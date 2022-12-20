@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  ENDPOINT:
+    Type: String
+  S3BucketName:
+    Type: String
+      
+Resources:
+  bioinvoke:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageUri: <AWS account>.dkr.ecr.us-east-1.amazonaws.com/docker_name:latest
+      MemorySize: 8196
+      Timeout: 600
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket:
+              Ref: SourceS3Bucket
+            Events: s3:ObjectCreated:*
+      Environment:
+        Variables:
+          SAGEMAKER_ENDPOINT: !Ref ENDPOINT
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref S3BucketName
+        - AmazonSageMakerFullAccess
+
+  SourceS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref S3BucketName
+      
+Outputs:
+  FunctionArn:
+    Description: ARN of the Lambda function
+    Value: !GetAtt bioinvoke.Arn
+  FunctionName:
+    Description: Name of the Lambda function
+    Value: !Ref bioinvoke

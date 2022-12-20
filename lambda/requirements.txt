@@ -1,0 +1,4 @@
+segmentation_models_3D
+patchify
+scikit-image
+sagemaker
