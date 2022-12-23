@@ -10,7 +10,6 @@ function App({ signOut, user }) {
   const [file, setFile] = useState(null);
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [fileContents, setFileContents] = useState(null);
   const [uploadStatus, setUploadStatus] = useState(null);
 
   const listImageClick = async () => {
@@ -27,17 +26,34 @@ function App({ signOut, user }) {
   };
 
 
-  async function getImageURL(filename) {
+  async function downloadImageFile(filename) {
     try {
       const fileurl = await Storage.get(filename, {
         level: "public"
       });
-      setFileContents(fileurl);
+
+      const xmlHttp = new XMLHttpRequest();
+      xmlHttp.onreadystatechange = () => {
+        if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+          const blobUrl = window.URL.createObjectURL(xmlHttp.response);
+          const e = document.createElement('a');
+          e.href = blobUrl;
+          e.download = filename;
+          document.body.appendChild(e);
+          e.click();
+          document.body.removeChild(e);
+        }
+      };
+      xmlHttp.responseType = 'blob';
+      xmlHttp.open('GET', fileurl, true);
+      xmlHttp.send(null);
+
     }
     catch (error) {
       console.error(error);
     }
-  };
+
+  }
 
   function handleFileChange(event) {
     setFile(event.target.files[0]);
@@ -76,18 +92,21 @@ function App({ signOut, user }) {
 
       {isLoading ? <p>Loading...</p> : (
         <div>
-          {Array.isArray(images.results) ? images.results.filter(file => file.key !== 'results/').map(file => (
-            <p>{file.key} &nbsp;&nbsp; {Array.isArray(getImageURL(file.key))}
-              <a href={fileContents} target="_blank" rel='noreferrer' download> Download </a>
-            </p>
-          )) : null}
-
+          {Array.isArray(images.results) ?
+            images.results.filter(file => file.key !== 'results/')
+            .map(file => (
+              <p key={file.key}>{file.key} &nbsp;&nbsp;
+                <button id="downloadBtn" onClick={
+                  () => downloadImageFile(file.key)
+                  } value="download">Download
+                </button>
+              </p>
+            )) : null}
         </div>
       )}
 
       <br />
       <br />
-
 
       <Button style={styles.button} onClick={signOut}>Sign out</Button>
     </div>
