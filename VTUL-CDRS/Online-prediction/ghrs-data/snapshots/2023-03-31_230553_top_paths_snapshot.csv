@@ -1,0 +1,6 @@
+url_path,views_total,views_unique
+/VTUL-CDRS/Online-prediction,5,3
+/VTUL-CDRS/Online-prediction/tree/main/.github/workflows,2,2
+/VTUL-CDRS/Online-prediction/tree/main/images,2,2
+/VTUL-CDRS/Online-prediction/tree/main/sagemaker,2,2
+/VTUL-CDRS/Online-prediction/blob/main/sagemaker/create_endpoint.py,1,1
